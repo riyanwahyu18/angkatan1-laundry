@@ -1,15 +1,40 @@
 <?php
-    if(isset($_POST["save"])) {
-        $name = $_POST['name'];
-        $email = $_POST['email'];
-        $password = sha1($_POST['password']);
-        $id_level = $_POST['id_level'];
+
+if (empty($_SESSION['click_count'])){
+    $_SESSION['click_count'] = 0;
+}
+
+if(isset($_POST["save"])) {
+    $trans_code = $_POST['trans_code'];
+    $order_date = $_POST['order_date'];
+    $id_customer = $_POST['id_customer'];
+    $order_end_date = $_POST['order_end_date'];
+    
+    $insert = mysqli_query($koneksi, "INSERT INTO trans_order (trans_code, order_date, id_customer, order_end_date) VALUES('$trans_code', '$order_date', '$id_customer', '$order_end_date')");
+    // if($insert){
+    //     header("location:?dashboard.php?page=trans-order");
+    // }
+    
+    //id_service = $_POST['id_service'];
+    $id_order = mysqli_insert_id($koneksi);
+    $qty = isset($_POST["qty"]) ? $_POST["qty"] : 0;
+    $notes = isset($_POST['notes']) ? $_POST['notes'] :'';
+    $id_service = isset($_POST['id_service']) ? $_POST['id_service'] : 0;
+
+
+    for ($i=0; $i < $_POST['countDisplay']; $i++) {
+        $service_name = $_POST['service_name'];
+        $cariId_service = mysqli_query($koneksi,"SELECT id FROM services WHERE service_name = '$service_name'");
+        $rowId_service = mysqli_fetch_assoc($cariId_service);
+        $id_service = isset($rowId_service['id']) ? $rowId_service['id'] : 0 ;
         
-        $insert = mysqli_query($koneksi, "INSERT INTO users (id_level, name, email, password) VALUES('$id_level','$name', '$email', '$password')");
-        if($insert){
-            header("location:?page=user&add=success");
-        }
+
+        $instOrderDet = mysqli_query($koneksi,"INSERT INTO trans_order_detail (id_order, id_service, qty, notes) VALUES ('$id_order', '$id_service', '$qty[$i]', '$notes[$i]')");
     }
+
+    }
+
+
     
     if(isset($_POST["edit"])) {
         $id = $_GET['edit'];
@@ -81,7 +106,7 @@ $kode_transaksi = "TR ".date("mdy") . sprintf("%03s", $id_trans);
                                     <label for="">Order Date</label>
                                 </div>
                                 <div class="col-sm-5">
-                                    <input type="date" class="form-control" name="order_date" readonly>
+                                    <input type="date" class="form-control" name="order_date">
                                 </div>
                             </div>
                             <div class="mb-3 row">
@@ -132,10 +157,12 @@ $kode_transaksi = "TR ".date("mdy") . sprintf("%03s", $id_trans);
                         <div class="col-sm-12">
                             <div align="right" class="mb-3">
                                 <button type="button" class="btn btn-success btn-sm add-row">Add Row</button>
+                                <input type="number" name="countDisplay" id="countDisplay" value="<?php echo    $_SESSION['click_count'] ?>" readonly>
                             </div>
                             <table class="table table-bordered table-order">
                                 <thead>
                                     <tr>
+                                        <th>No</th>
                                         <th>Service</th>
                                         <th>Price</th>
                                         <th>Qty</th>

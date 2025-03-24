@@ -120,11 +120,16 @@ include "koneksi.php";
     });
 
     $('.add-row').click(function() {
+        let countDisplay = document.getElementById("countDisplay");
+        let current = parseInt(countDisplay.value) || 0;
+        current++;
+        countDisplay.value = current;
         let service_name = $('#id_service').find("option:selected").text();
         let service_price = $('#service_price').val();
         let newRow = "";
-        newRow += "<tr>"
-        newRow += `<td> ${service_name} </td>`;
+        newRow += "<tr>"    
+        newRow += `<td> ${current} </td>`;
+        newRow += `<td> ${service_name} <input type="text" value="${service_name}" name="service_name"> </td>`;
         newRow += `<td> ${service_price.toLocaleString()} </td>`;
         newRow += '<td><input class"form-control" name="qty[]" type="number"></td>';
         newRow += '<td><input class"form-control" name="notes[]" type="text"></td>';
