@@ -123,17 +123,25 @@ include "koneksi.php";
         let countDisplay = document.getElementById("countDisplay");
         let current = parseInt(countDisplay.value) || 0;
         current++;
+
         countDisplay.value = current;
+
+        let select = document.getElementById("id_service");
+            let selectOpt = select.options[select.selectedIndex];
+
+            let price = parseInt(selectOpt.getAttribute("data-price")) || 0;
+            
         let service_name = $('#id_service').find("option:selected").text();
         let service_price = $('#service_price').val();
         let newRow = "";
+
         newRow += "<tr>"    
         newRow += `<td> ${current} </td>`;
-        newRow += `<td> ${service_name} <input type="text" value="${service_name}" name="service_name"> </td>`;
-        newRow += `<td> ${service_price.toLocaleString()} </td>`;
-        newRow += '<td><input class"form-control" name="qty[]" type="number"></td>';
-        newRow += '<td><input class"form-control" name="notes[]" type="text"></td>';
-        newRow += "<td><button type='button' class='btn btn-success btn-sm remove'>Remove</button></td>"
+        newRow += `<td>  ${service_name} <input type='text' value='${service_name}' name='service_name[]'>  </td>`;
+        newRow += `<td>  ${service_price.toLocaleString()} <input type='text' name='subtotal[]' value='${price}' >  </td>`;
+        newRow += "<td><input class='form-control' name='qty[]' type='number'></td>";
+        newRow += "<td><input class='form-control' name='notes[]' type='text'></td>";
+        newRow += "<td><button type='button' class='btn btn-success btn-sm remove' id='remove'>Remove</button></td>";
         newRow += "</tr>"
 
         $('.table-order tbody').append(newRow);

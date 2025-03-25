@@ -17,25 +17,38 @@ if(isset($_POST["save"])) {
     
     //id_service = $_POST['id_service'];
     $id_order = mysqli_insert_id($koneksi);
-    $qty = isset($_POST["qty"]) ? $_POST["qty"] : 0;
-    $notes = isset($_POST['notes']) ? $_POST['notes'] :'';
-    $id_service = isset($_POST['id_service']) ? $_POST['id_service'] : 0;
+    $qty = isset($_POST['qty']) ? $_POST['qty'] : [];
+    $notes = isset($_POST['notes']) ? $_POST['notes'] : [];
+    $service_name = isset($_POST['service_name']) ? $_POST['service_name'] : [];
+    $subtotal = $_POST['subtotal'] ? $_POST['subtotal'] : [];
 
-
-    for ($i=0; $i < $_POST['countDisplay']; $i++) {
-        $service_name = $_POST['service_name'];
-        $cariId_service = mysqli_query($koneksi,"SELECT id FROM services WHERE service_name = '$service_name'");
-        $rowId_service = mysqli_fetch_assoc($cariId_service);
-        $id_service = isset($rowId_service['id']) ? $rowId_service['id'] : 0 ;
+    $total = 0;
+    for ($i = 0; $i < $_POST['countDisplay']; $i++) {
+        $service = $service_name[$i];
+        $cariId_service = mysqli_query($koneksi, "SELECT id FROM services WHERE service_name LIKE '%$service%'");
         
+        $rowid_service = mysqli_fetch_assoc($cariId_service);
+        $id_service = $rowid_service['id'];
+        
+        $qty_value = $qty[$i];
+        $subtotal_value = $subtotal[$i];
+        $notes_value = $notes[$i];
 
-        $instOrderDet = mysqli_query($koneksi,"INSERT INTO trans_order_detail (id_order, id_service, qty, notes) VALUES ('$id_order', '$id_service', '$qty[$i]', '$notes[$i]')");
+        $instOrderDet = mysqli_query($koneksi, "INSERT INTO trans_order_detail (id_order, id_service, qty, subtotal, notes) VALUES ('$id_order', '$id_service', '$qty_value', '$subtotal_value', '$notes_value')");
+
+        $total += ($subtotal_value * $qty_value);
+        
+        }
+    
+        $update = mysqli_query($koneksi, "UPDATE trans_order SET total='$total' WHERE id = '$id_order'");
     }
-
-    }
-
 
     
+
+    $id = isset($_GET['edit']) ? $_GET['edit'] : '';
+    $queryEdit = mysqli_query($koneksi, "SELECT * FROM users WHERE id = '$id'");
+    $rowEdit = mysqli_fetch_assoc($queryEdit);
+
     if(isset($_POST["edit"])) {
         $id = $_GET['edit'];
         $name = $_POST['name'];
@@ -114,10 +127,11 @@ $kode_transaksi = "TR ".date("mdy") . sprintf("%03s", $id_trans);
                                     <label for="">Service</label>
                                 </div>
                                 <div class="col-sm-5">
-                                    <select name="" id="id_service" class="form-control">
+                                    <select name="" id="id_service" class="form-control" required>
                                         <option value="" hidden>Choose Service</option>
                                         <?php foreach($rowServices as $rowService) : ?>
-                                            <option value="<?php echo $rowService['id']?>"><?php echo $rowService['service_name'] ?></option>
+                                            <option value="<?php echo $rowService['id'] ?>" data-price="<?php echo $rowService['service_price'] ?>"><?php echo $rowService['service_name'] ?></option>
+                                            <!-- <option value="<?php echo $rowService['id']?>"><?php echo $rowService['service_name'] ?></option> -->
                                         <?php endforeach ?>
                                     </select>
                                 </div>
@@ -176,6 +190,7 @@ $kode_transaksi = "TR ".date("mdy") . sprintf("%03s", $id_trans);
                         </div>
                         <div class="mb-3">
                             <button class="btn btn-primary" name="<?= isset($_GET['edit']) ? 'edit' : 'save' ?>" type="submit">Save</button>
+                            <button class="btn btn-danger"type="reset">Reset</button>
                         </div>
                     </div>
                     </form>
